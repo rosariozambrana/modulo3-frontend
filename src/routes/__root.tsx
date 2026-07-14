@@ -77,11 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Phoenix Orders — Gestión de Pedidos" },
+      {
+        name: "description",
+        content:
+          "MVP de Phoenix Orders para gestionar clientes, productos y pedidos.",
+      },
+      { name: "author", content: "Phoenix Financial Group" },
+      { property: "og:title", content: "Phoenix Orders" },
+      {
+        property: "og:description",
+        content: "Sistema interno para clientes, productos y pedidos.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
@@ -119,8 +126,44 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="min-h-screen bg-background text-foreground">
+        <AppHeader />
+        <main className="mx-auto max-w-6xl px-6 py-8">
+          <Outlet />
+        </main>
+      </div>
     </QueryClientProvider>
+  );
+}
+
+function AppHeader() {
+  const linkCls =
+    "px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors";
+  const activeCls = "text-primary border-b-2 border-primary";
+  return (
+    <header className="border-b border-border bg-card">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link to="/" className="flex items-center gap-2">
+          <span className="h-2 w-8 rounded-full bg-primary" />
+          <span className="text-lg font-bold tracking-tight">
+            PHOENIX <span className="text-primary">ORDERS</span>
+          </span>
+        </Link>
+        <nav className="flex items-center gap-1">
+          <Link to="/" className={linkCls} activeOptions={{ exact: true }} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+            Inicio
+          </Link>
+          <Link to="/clientes" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+            Clientes
+          </Link>
+          <Link to="/productos" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+            Productos
+          </Link>
+          <Link to="/pedidos" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+            Pedidos
+          </Link>
+        </nav>
+      </div>
+    </header>
   );
 }
