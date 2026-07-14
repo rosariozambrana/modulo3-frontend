@@ -52,6 +52,13 @@ function PedidosPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
+  const money = (n: number) =>
+    new Intl.NumberFormat("es-CO", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(Number.isFinite(n) ? n : 0);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -80,14 +87,23 @@ function PedidosPage() {
     [productos],
   );
 
-  const total = useMemo(
-    () =>
-      items.reduce((sum, it) => {
-        const p = productosMap.get(it.productId);
-        return sum + (p ? p.price * it.quantity : 0);
-      }, 0),
-    [items, productosMap],
-  );
+  const { subtotal, totalUnidades, stockError } = useMemo(() => {
+    let sub = 0;
+    let units = 0;
+    let err: string | null = null;
+    for (const it of items) {
+      const p = productosMap.get(it.productId);
+      if (!p) continue;
+      sub += Number(p.price) * it.quantity;
+      units += it.quantity;
+      if (it.quantity > p.stock)
+        err = `Stock insuficiente para "${p.name}" (disponible: ${p.stock})`;
+      if (it.quantity <= 0) err = `La cantidad debe ser mayor a 0`;
+    }
+    return { subtotal: sub, totalUnidades: units, stockError: err };
+  }, [items, productosMap]);
+
+  const total = subtotal;
 
   const addItem = () => {
     if (productos.length === 0) return;
@@ -106,8 +122,7 @@ function PedidosPage() {
     e.preventDefault();
     if (!clientId) return setError(new Error("Selecciona un cliente"));
     if (items.length === 0) return setError(new Error("Agrega al menos 1 producto"));
-    if (items.some((i) => i.quantity <= 0))
-      return setError(new Error("Las cantidades deben ser mayores a 0"));
+    if (stockError) return setError(new Error(stockError));
     try {
       await PedidosService.create({ clientId, items });
       setClientId("");
@@ -165,17 +180,18 @@ function PedidosPage() {
                 <thead>
                   <tr className="border-b border-border bg-muted/50 text-left text-xs uppercase text-muted-foreground">
                     <th className="p-2">Producto</th>
-                    <th className="p-2 w-28">Cantidad</th>
-                    <th className="p-2 w-28">Precio</th>
-                    <th className="p-2 w-28">Subtotal</th>
+                    <th className="p-2 w-32">Cantidad</th>
+                    <th className="p-2 w-28 text-right">Precio unit.</th>
+                    <th className="p-2 w-32 text-right">Subtotal</th>
                     <th className="p-2 w-16"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((it, i) => {
                     const p = productosMap.get(it.productId);
+                    const excede = p ? it.quantity > p.stock : false;
                     return (
-                      <tr key={i} className="border-b border-border/50">
+                      <tr key={i} className="border-b border-border/50 align-middle">
                         <td className="p-2">
                           <Select
                             value={it.productId}
@@ -183,31 +199,64 @@ function PedidosPage() {
                           >
                             {productos.map((prod) => (
                               <option key={prod.id} value={prod.id}>
-                                {prod.name} (stock: {prod.stock})
+                                {prod.name} — {money(Number(prod.price))} (stock: {prod.stock})
                               </option>
                             ))}
                           </Select>
+                          {p && (
+                            <div className="mt-1 text-xs text-muted-foreground">
+                              Stock disponible: <span className={excede ? "font-semibold text-destructive" : ""}>{p.stock}</span>
+                            </div>
+                          )}
                         </td>
                         <td className="p-2">
-                          <Input
-                            type="number"
-                            min={1}
-                            max={p?.stock ?? 999}
-                            value={it.quantity}
-                            onChange={(e) =>
-                              updateItem(i, { quantity: Number(e.target.value) })
-                            }
-                          />
+                          <div className="flex items-center gap-1">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="!px-2 !py-1"
+                              onClick={() =>
+                                updateItem(i, { quantity: Math.max(1, it.quantity - 1) })
+                              }
+                            >
+                              −
+                            </Button>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={p?.stock ?? 999}
+                              value={it.quantity}
+                              onChange={(e) =>
+                                updateItem(i, { quantity: Math.max(1, Number(e.target.value) || 1) })
+                              }
+                              className="text-center"
+                            />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="!px-2 !py-1"
+                              onClick={() =>
+                                updateItem(i, {
+                                  quantity: Math.min(p?.stock ?? 999, it.quantity + 1),
+                                })
+                              }
+                            >
+                              +
+                            </Button>
+                          </div>
                         </td>
-                        <td className="p-2">${p ? Number(p.price).toFixed(2) : "—"}</td>
-                        <td className="p-2 font-semibold">
-                          ${p ? (p.price * it.quantity).toFixed(2) : "—"}
+                        <td className="p-2 text-right tabular-nums">
+                          {p ? money(Number(p.price)) : "—"}
+                        </td>
+                        <td className="p-2 text-right font-semibold tabular-nums">
+                          {p ? money(Number(p.price) * it.quantity) : "—"}
                         </td>
                         <td className="p-2 text-right">
                           <Button
                             type="button"
                             variant="ghost"
                             onClick={() => removeItem(i)}
+                            aria-label="Quitar producto"
                           >
                             ✕
                           </Button>
@@ -218,11 +267,14 @@ function PedidosPage() {
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/30">
-                    <td colSpan={3} className="p-2 text-right text-sm font-semibold uppercase">
-                      Total
+                    <td colSpan={3} className="p-2 text-right text-xs uppercase text-muted-foreground">
+                      {items.length} producto{items.length !== 1 && "s"} · {totalUnidades} unidad{totalUnidades !== 1 && "es"}
                     </td>
-                    <td colSpan={2} className="p-2 text-lg font-bold text-primary">
-                      ${total.toFixed(2)}
+                    <td colSpan={2} className="p-2 text-right">
+                      <div className="text-xs uppercase text-muted-foreground">Total</div>
+                      <div className="text-xl font-black text-primary tabular-nums">
+                        {money(total)}
+                      </div>
                     </td>
                   </tr>
                 </tfoot>
@@ -230,9 +282,18 @@ function PedidosPage() {
             </div>
           )}
 
+          {stockError && (
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {stockError}
+            </div>
+          )}
+
           <div className="flex justify-end">
-            <Button type="submit" disabled={!clientId || items.length === 0}>
-              Crear pedido
+            <Button
+              type="submit"
+              disabled={!clientId || items.length === 0 || !!stockError}
+            >
+              Crear pedido · {money(total)}
             </Button>
           </div>
         </form>
@@ -264,8 +325,8 @@ function PedidosPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge tone={estadoTone(p.status)}>{p.status}</Badge>
-                    <div className="text-lg font-bold text-primary">
-                      ${Number(p.total).toFixed(2)}
+                    <div className="text-lg font-bold text-primary tabular-nums">
+                      {money(Number(p.total))}
                     </div>
                     <Select
                       value={p.status}
@@ -283,21 +344,24 @@ function PedidosPage() {
                   </div>
                 </div>
                 <ul className="mt-3 divide-y divide-border/50 text-sm">
-                  {p.items.map((it, i) => (
-                    <li key={i} className="flex justify-between py-1">
-                      <span>
-                        {it.productName ??
-                          productosMap.get(it.productId)?.name ??
-                          it.productId}{" "}
-                        × {it.quantity}
-                      </span>
-                      {it.unitPrice != null && (
-                        <span className="text-muted-foreground">
-                          ${(it.unitPrice * it.quantity).toFixed(2)}
+                  {p.items.map((it, i) => {
+                    const prod = productosMap.get(it.productId);
+                    const unit = it.unitPrice ?? (prod ? Number(prod.price) : null);
+                    const sub = unit != null ? unit * it.quantity : null;
+                    return (
+                      <li key={i} className="flex items-center justify-between gap-3 py-1.5">
+                        <span className="flex-1">
+                          {it.productName ?? prod?.name ?? it.productId}
                         </span>
-                      )}
-                    </li>
-                  ))}
+                        <span className="w-32 text-right text-muted-foreground tabular-nums">
+                          {unit != null ? money(unit) : "—"} × {it.quantity}
+                        </span>
+                        <span className="w-24 text-right font-semibold tabular-nums">
+                          {sub != null ? money(sub) : "—"}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             ))}
