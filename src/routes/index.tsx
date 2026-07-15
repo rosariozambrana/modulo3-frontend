@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const modulos = [
     {
-      to: "/clientes" as const,
+      to: "/clientes",
       title: "Clientes",
       desc: "Registra, actualiza y desactiva la base de clientes.",
       icon: (
@@ -19,7 +19,7 @@ function Index() {
       ),
     },
     {
-      to: "/productos" as const,
+      to: "/productos",
       title: "Productos",
       desc: "Gestiona catálogo, precios y stock disponible en tiempo real.",
       icon: (
@@ -31,7 +31,7 @@ function Index() {
       ),
     },
     {
-      to: "/pedidos" as const,
+      to: "/pedidos",
       title: "Pedidos",
       desc: "Crea pedidos, agrega productos y controla el estado del flujo.",
       icon: (

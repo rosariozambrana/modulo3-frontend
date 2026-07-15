@@ -29,7 +29,8 @@ function ClientesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      setItems(await ClientesService.list());
+      const result = await ClientesService.list();
+      setItems(result.items);   // ✅ ahora sí es un array
       setError(null);
     } catch (e) {
       setError(e);
