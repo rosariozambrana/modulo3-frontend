@@ -42,8 +42,8 @@ export interface PedidoItem {
 
 export interface Pedido {
   id: string;
-  clientId: string;
-  clientName?: string;
+  customerId: string;        // ✅ corregido
+  customerName?: string;     // ✅ corregido
   items: PedidoItem[];
   status: PedidoEstado;
   total: number;
@@ -51,6 +51,6 @@ export interface Pedido {
 }
 
 export interface PedidoInput {
-  clientId: string;
+  customerId: string;        // ✅ corregido
   items: { productId: string; quantity: number }[];
 }

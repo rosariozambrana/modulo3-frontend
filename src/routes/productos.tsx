@@ -30,7 +30,8 @@ function ProductosPage() {
   const load = async () => {
     setLoading(true);
     try {
-      setItems(await ProductosService.list());
+      const result = await ProductosService.list();
+      setItems(Array.isArray(result.items) ? result.items : []); // ✅ ahora sí guarda el array
       setError(null);
     } catch (e) {
       setError(e);
@@ -78,6 +79,13 @@ function ProductosPage() {
     }
   };
 
+  const money = (n: number) =>
+    new Intl.NumberFormat("es-BO", {
+      style: "currency",
+      currency: "BOB", // ✅ Bolivianos
+      minimumFractionDigits: 2,
+    }).format(Number.isFinite(n) ? n : 0);
+
   return (
     <div>
       <PageHeader eyebrow="Módulo" title="Productos" />
@@ -107,19 +115,20 @@ function ProductosPage() {
               <Field label="Precio">
                 <Input
                   type="number"
-                  step="0.01"
-                  min="0.01"
+                  step={1}
+                  min={1}
                   required
-                  value={form.price}
+                  value={form.price || ""}
                   onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
                 />
               </Field>
               <Field label="Stock">
                 <Input
                   type="number"
-                  min="0"
+                  step={1}
+                  min={0}
                   required
-                  value={form.stock}
+                  value={form.stock || ""}
                   onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
                 />
               </Field>
@@ -169,7 +178,7 @@ function ProductosPage() {
                           <div className="text-xs text-muted-foreground">{p.description}</div>
                         )}
                       </td>
-                      <td className="py-2 pr-2">${Number(p.price).toFixed(2)}</td>
+                      <td className="py-2 pr-2">{money(p.price)}</td>
                       <td className="py-2 pr-2">
                         <Badge tone={p.stock > 5 ? "success" : p.stock > 0 ? "warn" : "danger"}>
                           {p.stock}

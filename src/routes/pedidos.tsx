@@ -67,9 +67,9 @@ function PedidosPage() {
         ClientesService.list(),
         ProductosService.list(),
       ]);
-      setPedidos(p);
-      setClientes(c.filter((x) => x.isActive));
-      setProductos(pr.filter((x) => x.isActive));
+      setPedidos(p.items); // ✅ corregido
+      setClientes(c.items.filter((x) => x.isActive)); // ✅ corregido
+      setProductos(pr.items.filter((x) => x.isActive)); // ✅ corregido
       setError(null);
     } catch (e) {
       setError(e);
@@ -118,20 +118,21 @@ function PedidosPage() {
     setItems(items.filter((_, i) => i !== idx));
   };
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!clientId) return setError(new Error("Selecciona un cliente"));
-    if (items.length === 0) return setError(new Error("Agrega al menos 1 producto"));
-    if (stockError) return setError(new Error(stockError));
-    try {
-      await PedidosService.create({ clientId, items });
-      setClientId("");
-      setItems([]);
-      await load();
-    } catch (err) {
-      setError(err);
-    }
-  };
+const submit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!clientId) return setError(new Error("Selecciona un cliente"));
+  if (items.length === 0) return setError(new Error("Agrega al menos 1 producto"));
+  if (stockError) return setError(new Error(stockError));
+  try {
+    await PedidosService.create({ customerId: clientId, items }); // ✅ corregido
+    setClientId("");
+    setItems([]);
+    await load();
+  } catch (err) {
+    setError(err);
+  }
+};
+
 
   const changeStatus = async (id: string, status: PedidoEstado) => {
     try {
@@ -142,7 +143,8 @@ function PedidosPage() {
     }
   };
 
-  return (
+
+    return (
     <div>
       <PageHeader eyebrow="Módulo" title="Pedidos" />
       <ErrorBanner error={error} />
@@ -317,11 +319,12 @@ function PedidosPage() {
                     <div className="text-xs text-muted-foreground">
                       #{p.id.slice(0, 8)} · {new Date(p.createdAt).toLocaleString()}
                     </div>
-                    <div className="font-semibold">
-                      {p.clientName ??
-                        clientes.find((c) => c.id === p.clientId)?.fullName ??
-                        p.clientId}
-                    </div>
+<div className="font-semibold">
+  {p.customerName ??
+    clientes.find((c) => c.id === p.customerId)?.fullName ??
+    p.customerId}
+</div>
+
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge tone={estadoTone(p.status)}>{p.status}</Badge>
