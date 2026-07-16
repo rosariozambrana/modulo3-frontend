@@ -1,17 +1,12 @@
 // Capa HTTP genérica. Configura la URL del backend en .env => VITE_API_URL
 // Ejemplo: VITE_API_URL=http://localhost:3000/api
-
 const BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ??
   "http://localhost:3000/api";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
-async function request<T>(
-  path: string,
-  method: Method = "GET",
-  body?: unknown,
-): Promise<T> {
+async function request<T>(path: string, method: Method = "GET", body?: unknown): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: { "Content-Type": "application/json" },

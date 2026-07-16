@@ -27,11 +27,7 @@ export type ProductoInput = Omit<Producto, "id" | "isActive" | "createdAt"> & {
   isActive?: boolean;
 };
 
-export type PedidoEstado =
-  | "PENDIENTE"
-  | "CONFIRMADO"
-  | "ENTREGADO"
-  | "CANCELADO";
+export type PedidoEstado = "PENDIENTE" | "CONFIRMADO" | "ENTREGADO" | "CANCELADO";
 
 export interface PedidoItem {
   productId: string;
@@ -42,8 +38,8 @@ export interface PedidoItem {
 
 export interface Pedido {
   id: string;
-  customerId: string;        // ✅ corregido
-  customerName?: string;     // ✅ corregido
+  customerId: string; // ✅ corregido
+  customerName?: string; // ✅ corregido
   items: PedidoItem[];
   status: PedidoEstado;
   total: number;
@@ -51,6 +47,6 @@ export interface Pedido {
 }
 
 export interface PedidoInput {
-  customerId: string;        // ✅ corregido
+  customerId: string; // ✅ corregido
   items: { productId: string; quantity: number }[];
 }

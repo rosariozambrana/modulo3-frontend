@@ -80,8 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Phoenix Orders — Gestión de Pedidos" },
       {
         name: "description",
-        content:
-          "MVP de Phoenix Orders para gestionar clientes, productos y pedidos.",
+        content: "MVP de Phoenix Orders para gestionar clientes, productos y pedidos.",
       },
       { name: "author", content: "Phoenix Financial Group" },
       { property: "og:title", content: "Phoenix Orders" },
@@ -150,16 +149,33 @@ function AppHeader() {
           </span>
         </Link>
         <nav className="flex items-center gap-1">
-          <Link to="/" className={linkCls} activeOptions={{ exact: true }} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+          <Link
+            to="/"
+            className={linkCls}
+            activeOptions={{ exact: true }}
+            activeProps={{ className: `${linkCls} ${activeCls}` }}
+          >
             Inicio
           </Link>
-          <Link to="/clientes" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+          <Link
+            to="/clientes"
+            className={linkCls}
+            activeProps={{ className: `${linkCls} ${activeCls}` }}
+          >
             Clientes
           </Link>
-          <Link to="/productos" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+          <Link
+            to="/productos"
+            className={linkCls}
+            activeProps={{ className: `${linkCls} ${activeCls}` }}
+          >
             Productos
           </Link>
-          <Link to="/pedidos" className={linkCls} activeProps={{ className: `${linkCls} ${activeCls}` }}>
+          <Link
+            to="/pedidos"
+            className={linkCls}
+            activeProps={{ className: `${linkCls} ${activeCls}` }}
+          >
             Pedidos
           </Link>
         </nav>
