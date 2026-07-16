@@ -30,26 +30,56 @@ jobs:
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
-      - name: Debug - List build output
+      - name: Prepare deployment package
         run: |
-          echo "=== Listing .output/public directory ==="
-          ls -laR .output/public/ || echo ".output/public not found"
-          echo ""
-          echo "=== Checking for index.html ==="
-          find .output/public/ -name "*.html" || echo "No HTML files found"
+          # Create deployment directory
+          mkdir -p deploy
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+          # Copy server build output
+          cp -r .output/server deploy/
+          cp -r .output/public deploy/
+
+          # Create production package.json
+          cat > deploy/package.json << EOF
+          {
+            "name": "phoenix-orders-frontend",
+            "version": "1.0.0",
+            "type": "module",
+            "scripts": {
+              "start": "node server/index.mjs"
+            },
+            "engines": {
+              "node": "20.x"
+            }
+          }
+          EOF
+
+          # Create Procfile for Elastic Beanstalk
+          echo "web: npm start" > deploy/Procfile
+
+          # List deployment contents
+          echo "=== Deployment package contents ==="
+          ls -la deploy/
+
+      - name: Generate deployment package
+        run: |
+          cd deploy
+          zip -r ../deploy.zip .
+          cd ..
+          ls -lh deploy.zip
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Deploy to S3
-        run: |
-          aws s3 sync .output/public/ s3://${{ secrets.S3_BUCKET }}/ --delete
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: ${{ secrets.EB_APPLICATION_NAME }}
+          environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
+          version_label: ${{ github.sha }}
+          region: ${{ secrets.AWS_REGION }}
+          deployment_package: deploy.zip
 
       - name: Deployment successful
         run: |
-          echo "✅ Frontend deployed successfully!"
-          echo "URL: http://${{ secrets.S3_BUCKET }}.s3-website-${{ secrets.AWS_REGION }}.amazonaws.com"
+          echo "✅ Frontend deployed successfully to Elastic Beanstalk!"
+          echo "URL: http://Phoenixorders-dev.us-east-1.elasticbeanstalk.com"
