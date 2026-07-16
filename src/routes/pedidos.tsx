@@ -3,12 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PedidosService } from "@/services/pedidos.service";
 import { ClientesService } from "@/services/clientes.service";
 import { ProductosService } from "@/services/productos.service";
-import type {
-  Cliente,
-  Pedido,
-  PedidoEstado,
-  Producto,
-} from "@/models/types";
+import type { Cliente, Pedido, PedidoEstado, Producto } from "@/models/types";
 import {
   Badge,
   Button,
@@ -25,18 +20,16 @@ export const Route = createFileRoute("/pedidos")({
   component: PedidosPage,
 });
 
-const ESTADOS: PedidoEstado[] = [
-  "PENDIENTE",
-  "CONFIRMADO",
-  "ENTREGADO",
-  "CANCELADO",
-];
+const ESTADOS: PedidoEstado[] = ["PENDIENTE", "CONFIRMADO", "ENTREGADO", "CANCELADO"];
 
 const estadoTone = (s: PedidoEstado) =>
-  s === "PENDIENTE" ? "warn"
-  : s === "CONFIRMADO" ? "primary"
-  : s === "ENTREGADO" ? "success"
-  : "danger";
+  s === "PENDIENTE"
+    ? "warn"
+    : s === "CONFIRMADO"
+      ? "primary"
+      : s === "ENTREGADO"
+        ? "success"
+        : "danger";
 
 interface DraftItem {
   productId: string;
@@ -82,10 +75,7 @@ function PedidosPage() {
     load();
   }, []);
 
-  const productosMap = useMemo(
-    () => new Map(productos.map((p) => [p.id, p])),
-    [productos],
-  );
+  const productosMap = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
 
   const { subtotal, totalUnidades, stockError } = useMemo(() => {
     let sub = 0;
@@ -118,21 +108,20 @@ function PedidosPage() {
     setItems(items.filter((_, i) => i !== idx));
   };
 
-const submit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!clientId) return setError(new Error("Selecciona un cliente"));
-  if (items.length === 0) return setError(new Error("Agrega al menos 1 producto"));
-  if (stockError) return setError(new Error(stockError));
-  try {
-    await PedidosService.create({ customerId: clientId, items }); // ✅ corregido
-    setClientId("");
-    setItems([]);
-    await load();
-  } catch (err) {
-    setError(err);
-  }
-};
-
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!clientId) return setError(new Error("Selecciona un cliente"));
+    if (items.length === 0) return setError(new Error("Agrega al menos 1 producto"));
+    if (stockError) return setError(new Error(stockError));
+    try {
+      await PedidosService.create({ customerId: clientId, items }); // ✅ corregido
+      setClientId("");
+      setItems([]);
+      await load();
+    } catch (err) {
+      setError(err);
+    }
+  };
 
   const changeStatus = async (id: string, status: PedidoEstado) => {
     try {
@@ -143,24 +132,17 @@ const submit = async (e: React.FormEvent) => {
     }
   };
 
-
-    return (
+  return (
     <div>
       <PageHeader eyebrow="Módulo" title="Pedidos" />
       <ErrorBanner error={error} />
 
       <Card className="mb-6">
-        <h2 className="mb-4 text-sm font-bold uppercase tracking-wide">
-          Nuevo pedido
-        </h2>
+        <h2 className="mb-4 text-sm font-bold uppercase tracking-wide">Nuevo pedido</h2>
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Cliente">
-              <Select
-                required
-                value={clientId}
-                onChange={(e) => setClientId(e.target.value)}
-              >
+              <Select required value={clientId} onChange={(e) => setClientId(e.target.value)}>
                 <option value="">— Selecciona un cliente —</option>
                 {clientes.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -207,7 +189,10 @@ const submit = async (e: React.FormEvent) => {
                           </Select>
                           {p && (
                             <div className="mt-1 text-xs text-muted-foreground">
-                              Stock disponible: <span className={excede ? "font-semibold text-destructive" : ""}>{p.stock}</span>
+                              Stock disponible:{" "}
+                              <span className={excede ? "font-semibold text-destructive" : ""}>
+                                {p.stock}
+                              </span>
                             </div>
                           )}
                         </td>
@@ -229,7 +214,9 @@ const submit = async (e: React.FormEvent) => {
                               max={p?.stock ?? 999}
                               value={it.quantity}
                               onChange={(e) =>
-                                updateItem(i, { quantity: Math.max(1, Number(e.target.value) || 1) })
+                                updateItem(i, {
+                                  quantity: Math.max(1, Number(e.target.value) || 1),
+                                })
                               }
                               className="text-center"
                             />
@@ -269,8 +256,12 @@ const submit = async (e: React.FormEvent) => {
                 </tbody>
                 <tfoot>
                   <tr className="bg-muted/30">
-                    <td colSpan={3} className="p-2 text-right text-xs uppercase text-muted-foreground">
-                      {items.length} producto{items.length !== 1 && "s"} · {totalUnidades} unidad{totalUnidades !== 1 && "es"}
+                    <td
+                      colSpan={3}
+                      className="p-2 text-right text-xs uppercase text-muted-foreground"
+                    >
+                      {items.length} producto{items.length !== 1 && "s"} · {totalUnidades} unidad
+                      {totalUnidades !== 1 && "es"}
                     </td>
                     <td colSpan={2} className="p-2 text-right">
                       <div className="text-xs uppercase text-muted-foreground">Total</div>
@@ -291,10 +282,7 @@ const submit = async (e: React.FormEvent) => {
           )}
 
           <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={!clientId || items.length === 0 || !!stockError}
-            >
+            <Button type="submit" disabled={!clientId || items.length === 0 || !!stockError}>
               Crear pedido · {money(total)}
             </Button>
           </div>
@@ -310,21 +298,17 @@ const submit = async (e: React.FormEvent) => {
         ) : (
           <div className="space-y-3">
             {pedidos.map((p) => (
-              <div
-                key={p.id}
-                className="rounded-md border border-border p-4"
-              >
+              <div key={p.id} className="rounded-md border border-border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="text-xs text-muted-foreground">
                       #{p.id.slice(0, 8)} · {new Date(p.createdAt).toLocaleString()}
                     </div>
-<div className="font-semibold">
-  {p.customerName ??
-    clientes.find((c) => c.id === p.customerId)?.fullName ??
-    p.customerId}
-</div>
-
+                    <div className="font-semibold">
+                      {p.customerName ??
+                        clientes.find((c) => c.id === p.customerId)?.fullName ??
+                        p.customerId}
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Badge tone={estadoTone(p.status)}>{p.status}</Badge>
@@ -333,9 +317,7 @@ const submit = async (e: React.FormEvent) => {
                     </div>
                     <Select
                       value={p.status}
-                      onChange={(e) =>
-                        changeStatus(p.id, e.target.value as PedidoEstado)
-                      }
+                      onChange={(e) => changeStatus(p.id, e.target.value as PedidoEstado)}
                       className="w-40"
                     >
                       {ESTADOS.map((s) => (
