@@ -8,7 +8,6 @@ export const ProductosService = {
   list: () => api.get<{ items: Producto[]; meta: any }>(BASE),
   getById: (id: string) => api.get<Producto>(`${BASE}/${id}`),
   create: (data: ProductoInput) => api.post<Producto>(BASE, data),
-  update: (id: string, data: Partial<ProductoInput>) =>
-    api.put<Producto>(`${BASE}/${id}`, data),
+  update: (id: string, data: Partial<ProductoInput>) => api.put<Producto>(`${BASE}/${id}`, data),
   deactivate: (id: string) => api.delete<void>(`${BASE}/${id}`),
 };

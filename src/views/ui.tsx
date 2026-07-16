@@ -19,9 +19,7 @@ export function PageHeader({
     <div className="mb-6 flex items-end justify-between border-b border-border pb-4">
       <div>
         {eyebrow && (
-          <div className="mb-1 text-xs font-semibold tracking-widest text-primary">
-            {eyebrow}
-          </div>
+          <div className="mb-1 text-xs font-semibold tracking-widest text-primary">{eyebrow}</div>
         )}
         <h1 className="text-3xl font-black uppercase tracking-tight">{title}</h1>
       </div>
@@ -41,8 +39,7 @@ export function Button({
     "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
   const variants: Record<string, string> = {
     primary: "bg-primary text-primary-foreground hover:opacity-90",
-    secondary:
-      "bg-secondary text-secondary-foreground hover:bg-accent border border-border",
+    secondary: "bg-secondary text-secondary-foreground hover:bg-accent border border-border",
     ghost: "text-foreground hover:bg-accent",
     danger: "bg-destructive text-destructive-foreground hover:opacity-90",
   };
@@ -58,7 +55,10 @@ export function Input({ className = "", ...props }: InputHTMLAttributes<HTMLInpu
   );
 }
 
-export function Textarea({ className = "", ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({
+  className = "",
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring ${className}`}
@@ -95,7 +95,13 @@ export function Card({ children, className = "" }: { children: ReactNode; classN
   );
 }
 
-export function Badge({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "primary" | "success" | "warn" | "danger" }) {
+export function Badge({
+  children,
+  tone = "default",
+}: {
+  children: ReactNode;
+  tone?: "default" | "primary" | "success" | "warn" | "danger";
+}) {
   const tones: Record<string, string> = {
     default: "bg-muted text-muted-foreground",
     primary: "bg-primary/10 text-primary",
@@ -104,7 +110,9 @@ export function Badge({ children, tone = "default" }: { children: ReactNode; ton
     danger: "bg-red-100 text-red-800",
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${tones[tone]}`}>
+    <span
+      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${tones[tone]}`}
+    >
       {children}
     </span>
   );

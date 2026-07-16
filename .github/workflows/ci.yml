@@ -7,27 +7,67 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  validate:
+    name: Validate Code Quality
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: 1. Checkout source code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 2. Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 3. Display Node.js and npm versions
+        run: |
+          node --version
+          npm --version
+
+      - name: 4. Install project dependencies
         run: npm ci
 
-      - name: Run lint
+      - name: 5. Run code linting
         run: npm run lint
         continue-on-error: true
 
-      - name: Build project
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: validate
+
+    steps:
+      - name: 1. Checkout source code
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 3. Install project dependencies
+        run: npm ci
+
+      - name: 4. Build project for production
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: 5. Verify build output
+        run: |
+          echo "Checking build output..."
+          ls -lah .output/
+          echo "Server files:"
+          ls -lah .output/server/
+          echo "Public files:"
+          ls -lah .output/public/
+
+      - name: 6. Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: .output/
+          retention-days: 1

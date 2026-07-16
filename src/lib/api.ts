@@ -1,8 +1,7 @@
 // Capa HTTP genérica. Configura la URL del backend en .env => VITE_API_URL
 // Ejemplo: VITE_API_URL=http://localhost:3000/api
 const BASE_URL =
-  (import.meta.env.VITE_API_URL as string | undefined) ??
-  "http://localhost:3000/api";
+  (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000/api";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

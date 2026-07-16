@@ -191,7 +191,9 @@ function ProductosPage() {
                       </td>
                       <td className="py-2 pr-2 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="secondary" onClick={() => edit(p)}>Editar</Button>
+                          <Button variant="secondary" onClick={() => edit(p)}>
+                            Editar
+                          </Button>
                           {p.isActive && (
                             <Button variant="danger" onClick={() => deactivate(p.id)}>
                               Desactivar
