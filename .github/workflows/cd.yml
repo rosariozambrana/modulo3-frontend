@@ -32,12 +32,11 @@ jobs:
 
       - name: Debug - List build output
         run: |
-          echo "=== Listing .output directory ==="
-          ls -la .output/ || echo ".output not found"
           echo "=== Listing .output/public directory ==="
-          ls -la .output/public/ || echo ".output/public not found"
-          echo "=== Listing root directory ==="
-          ls -la
+          ls -laR .output/public/ || echo ".output/public not found"
+          echo ""
+          echo "=== Checking for index.html ==="
+          find .output/public/ -name "*.html" || echo "No HTML files found"
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
