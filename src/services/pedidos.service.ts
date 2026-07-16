@@ -5,7 +5,7 @@ const BASE = "/pedidos";
 
 export const PedidosService = {
   // 🔑 Ajustamos para que list devuelva { items, meta }
-  list: () => api.get<{ items: Pedido[]; meta: any }>(BASE),
+  list: () => api.get<{ items: Pedido[]; meta: unknown }>(BASE),
 
   getById: (id: string) => api.get<Pedido>(`${BASE}/${id}`),
 

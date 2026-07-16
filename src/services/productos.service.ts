@@ -5,7 +5,7 @@ const BASE = "/productos";
 
 // 🔑 Ajustamos para que list devuelva { items, meta }
 export const ProductosService = {
-  list: () => api.get<{ items: Producto[]; meta: any }>(BASE),
+  list: () => api.get<{ items: Producto[]; meta: unknown }>(BASE),
   getById: (id: string) => api.get<Producto>(`${BASE}/${id}`),
   create: (data: ProductoInput) => api.post<Producto>(BASE, data),
   update: (id: string, data: Partial<ProductoInput>) => api.put<Producto>(`${BASE}/${id}`, data),
