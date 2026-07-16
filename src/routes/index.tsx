@@ -12,7 +12,13 @@ function Index() {
       title: "Clientes",
       desc: "Registra, actualiza y desactiva la base de clientes.",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="h-6 w-6"
+        >
           <circle cx="12" cy="8" r="4" />
           <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
         </svg>
@@ -23,7 +29,13 @@ function Index() {
       title: "Productos",
       desc: "Gestiona catálogo, precios y stock disponible en tiempo real.",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="h-6 w-6"
+        >
           <path d="M3 7l9-4 9 4-9 4-9-4z" />
           <path d="M3 7v10l9 4 9-4V7" />
           <path d="M12 11v10" />
@@ -35,7 +47,13 @@ function Index() {
       title: "Pedidos",
       desc: "Crea pedidos, agrega productos y controla el estado del flujo.",
       icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          className="h-6 w-6"
+        >
           <path d="M4 4h3l2 12h10l2-8H7" />
           <circle cx="10" cy="20" r="1.5" />
           <circle cx="18" cy="20" r="1.5" />
@@ -70,13 +88,12 @@ function Index() {
               Phoenix Financial Group
             </div>
             <h1 className="mt-5 text-4xl font-black leading-[1.05] tracking-tight md:text-5xl">
-              Gestiona clientes, productos y{" "}
-              <span className="text-primary">pedidos</span> en un solo lugar.
+              Gestiona clientes, productos y <span className="text-primary">pedidos</span> en un
+              solo lugar.
             </h1>
             <p className="mt-4 max-w-xl text-base text-muted-foreground">
-              Phoenix Orders es la plataforma interna para operar el flujo
-              comercial de punta a punta. Rápido, ordenado y listo para
-              conectar al backend Node.js + PostgreSQL.
+              Phoenix Orders es la plataforma interna para operar el flujo comercial de punta a
+              punta. Rápido, ordenado y listo para conectar al backend Node.js + PostgreSQL.
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link
@@ -100,9 +117,7 @@ function Index() {
                 key={s.label}
                 className="rounded-xl border border-border bg-background/70 p-4 backdrop-blur"
               >
-                <div className="text-2xl font-black tracking-tight text-foreground">
-                  {s.value}
-                </div>
+                <div className="text-2xl font-black tracking-tight text-foreground">{s.value}</div>
                 <div className="mt-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
                   {s.label}
                 </div>
@@ -132,12 +147,8 @@ function Index() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   {m.icon}
                 </div>
-                <h3 className="mt-5 text-lg font-bold tracking-tight">
-                  {m.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {m.desc}
-                </p>
+                <h3 className="mt-5 text-lg font-bold tracking-tight">{m.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{m.desc}</p>
                 <div className="mt-6 inline-flex items-center gap-1 text-xs font-semibold text-primary opacity-80 transition group-hover:gap-2 group-hover:opacity-100">
                   Ir al módulo <span aria-hidden>→</span>
                 </div>
@@ -154,16 +165,12 @@ function Index() {
             <div className="text-xs font-semibold uppercase tracking-widest text-primary">
               Integración
             </div>
-            <h3 className="mt-1 text-xl font-bold tracking-tight">
-              Conectar con el backend
-            </h3>
+            <h3 className="mt-1 text-xl font-bold tracking-tight">Conectar con el backend</h3>
             <p className="mt-2 text-sm text-muted-foreground">
               Configura{" "}
-              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
-                VITE_API_URL
-              </code>{" "}
-              en tu archivo <code className="font-mono">.env</code>. Endpoints
-              esperados: <code className="font-mono">/clientes</code>,{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">VITE_API_URL</code>{" "}
+              en tu archivo <code className="font-mono">.env</code>. Endpoints esperados:{" "}
+              <code className="font-mono">/clientes</code>,{" "}
               <code className="font-mono">/productos</code>,{" "}
               <code className="font-mono">/pedidos</code>.
             </p>

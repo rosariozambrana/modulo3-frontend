@@ -2,16 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ClientesService } from "@/services/clientes.service";
 import type { Cliente, ClienteInput } from "@/models/types";
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  ErrorBanner,
-  Field,
-  Input,
-  PageHeader,
-} from "@/views/ui";
+import { Badge, Button, Card, EmptyState, ErrorBanner, Field, Input, PageHeader } from "@/views/ui";
 
 export const Route = createFileRoute("/clientes")({
   component: ClientesPage,
@@ -30,7 +21,7 @@ function ClientesPage() {
     setLoading(true);
     try {
       const result = await ClientesService.list();
-      setItems(result.items);   // ✅ ahora sí es un array
+      setItems(result.items); // ✅ ahora sí es un array
       setError(null);
     } catch (e) {
       setError(e);
@@ -104,9 +95,7 @@ function ClientesPage() {
               />
             </Field>
             <div className="flex gap-2 pt-2">
-              <Button type="submit">
-                {editingId ? "Actualizar" : "Registrar"}
-              </Button>
+              <Button type="submit">{editingId ? "Actualizar" : "Registrar"}</Button>
               {editingId && (
                 <Button
                   type="button"
