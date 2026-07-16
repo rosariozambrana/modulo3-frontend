@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v6
         with:
+          workflow: ci.yml
           name: dist
           path: dist/
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run_id: ${{ github.event.workflow_run.id }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
