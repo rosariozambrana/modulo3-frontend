@@ -209,16 +209,17 @@ function PedidosPage() {
                               −
                             </Button>
                             <Input
-                              type="number"
-                              min={1}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
                               value={it.quantity || ""}
                               onChange={(e) => {
-                                const val = parseInt(e.target.value, 10);
+                                const val = parseInt(e.target.value.replace(/\D/g, ""), 10);
                                 updateItem(i, {
                                   quantity: isNaN(val) ? 0 : val
                                 });
                               }}
-                              className="text-center w-20"
+                              className="text-center w-24"
                             />
                             <Button
                               type="button"
