@@ -5,8 +5,8 @@ const BASE = "/pedidos";
 
 export const PedidosService = {
   list: async () => {
-    const res = await api.get<{ items: any[]; meta: unknown }>(BASE);
-    const mappedItems = res.items.map((p) => ({
+    const res = await api.get<{ items: Pedido[]; meta: unknown }>(BASE);
+    const mappedItems = res.items.map((p: Pedido) => ({
       ...p,
       status: translateStatusToEs(p.status),
     })) as Pedido[];
@@ -14,7 +14,7 @@ export const PedidosService = {
   },
 
   getById: async (id: string) => {
-    const p = await api.get<any>(`${BASE}/${id}`);
+    const p = await api.get<Pedido>(`${BASE}/${id}`);
     return {
       ...p,
       status: translateStatusToEs(p.status),

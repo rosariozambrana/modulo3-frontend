@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PedidosService } from "@/services/pedidos.service";
 import { ClientesService } from "@/services/clientes.service";
 import { ProductosService } from "@/services/productos.service";
-import type { Cliente, Pedido, PedidoEstado, Producto } from "@/models/types";
+import type { Cliente, Pedido, PedidoEstado, PedidoItem, Producto } from "@/models/types";
 import {
   Badge,
   Button,
@@ -45,7 +45,7 @@ function PedidosPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const money = (n: any) =>
+  const money = (n: number) =>
     new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "USD",
@@ -75,7 +75,7 @@ function PedidosPage() {
     load();
   }, []);
 
-  const productosMap = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
+  const productosMap = useMemo(() => new Map(productos.map((p: Producto) => [p.id, p])), [productos]);
 
   const { subtotal, totalUnidades, stockError } = useMemo(() => {
     let sub = 0;
@@ -101,11 +101,11 @@ function PedidosPage() {
   };
 
   const updateItem = (idx: number, patch: Partial<DraftItem>) => {
-    setItems(items.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
+    setItems(items.map((it: DraftItem, i: number) => (i === idx ? { ...it, ...patch } : it)));
   };
 
   const removeItem = (idx: number) => {
-    setItems(items.filter((_, i) => i !== idx));
+    setItems(items.filter((_: DraftItem, i: number) => i !== idx));
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -142,9 +142,9 @@ function PedidosPage() {
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Cliente">
-              <Select required value={clientId} onChange={(e) => setClientId(e.target.value)}>
+              <Select required value={clientId} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setClientId(e.target.value)}>
                 <option value="">— Selecciona un cliente —</option>
-                {clientes.map((c) => (
+                {clientes.map((c: Cliente) => (
                   <option key={c.id} value={c.id}>
                     {c.fullName} ({c.email})
                   </option>
@@ -171,7 +171,7 @@ function PedidosPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((it, i) => {
+                  {items.map((it: DraftItem, i: number) => {
                     const p = productosMap.get(it.productId);
                     const excede = p ? it.quantity > p.stock : false;
                     return (
@@ -179,9 +179,9 @@ function PedidosPage() {
                         <td className="p-2">
                           <Select
                             value={it.productId}
-                            onChange={(e) => updateItem(i, { productId: e.target.value })}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateItem(i, { productId: e.target.value })}
                           >
-                            {productos.map((prod) => (
+                            {productos.map((prod: Producto) => (
                               <option key={prod.id} value={prod.id}>
                                 {prod.name} — {money(Number(prod.price))} (stock: {prod.stock})
                               </option>
@@ -213,10 +213,10 @@ function PedidosPage() {
                               inputMode="numeric"
                               pattern="[0-9]*"
                               value={it.quantity || ""}
-                              onChange={(e) => {
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 const val = parseInt(e.target.value.replace(/\D/g, ""), 10);
                                 updateItem(i, {
-                                  quantity: isNaN(val) ? 0 : val
+                                  quantity: isNaN(val) ? 0 : val,
                                 });
                               }}
                               className="text-center w-24"
@@ -298,7 +298,7 @@ function PedidosPage() {
           <EmptyState message="Sin pedidos todavía." />
         ) : (
           <div className="space-y-3">
-            {pedidos.map((p) => (
+            {pedidos.map((p: Pedido) => (
               <div key={p.id} className="rounded-md border border-border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -318,10 +318,10 @@ function PedidosPage() {
                     </div>
                     <Select
                       value={p.status}
-                      onChange={(e) => changeStatus(p.id, e.target.value as PedidoEstado)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => changeStatus(p.id, e.target.value as PedidoEstado)}
                       className="w-40"
                     >
-                      {ESTADOS.map((s) => (
+                      {ESTADOS.map((s: PedidoEstado) => (
                         <option key={s} value={s}>
                           {s}
                         </option>
@@ -330,7 +330,7 @@ function PedidosPage() {
                   </div>
                 </div>
                 <ul className="mt-3 divide-y divide-border/50 text-sm">
-                  {p.items.map((it, i) => {
+                  {p.items.map((it: PedidoItem, i: number) => {
                     const prod = productosMap.get(it.productId);
                     const unit = it.unitPrice ?? (prod ? Number(prod.price) : null);
                     const sub = unit != null ? unit * it.quantity : null;
