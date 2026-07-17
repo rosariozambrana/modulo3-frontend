@@ -75,7 +75,10 @@ function PedidosPage() {
     load();
   }, []);
 
-  const productosMap = useMemo(() => new Map(productos.map((p: Producto) => [p.id, p])), [productos]);
+  const productosMap = useMemo(
+    () => new Map(productos.map((p: Producto) => [p.id, p])),
+    [productos],
+  );
 
   const { subtotal, totalUnidades, stockError } = useMemo(() => {
     let sub = 0;
@@ -142,7 +145,11 @@ function PedidosPage() {
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="Cliente">
-              <Select required value={clientId} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setClientId(e.target.value)}>
+              <Select
+                required
+                value={clientId}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setClientId(e.target.value)}
+              >
                 <option value="">— Selecciona un cliente —</option>
                 {clientes.map((c: Cliente) => (
                   <option key={c.id} value={c.id}>
@@ -179,7 +186,9 @@ function PedidosPage() {
                         <td className="p-2">
                           <Select
                             value={it.productId}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateItem(i, { productId: e.target.value })}
+                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                              updateItem(i, { productId: e.target.value })
+                            }
                           >
                             {productos.map((prod: Producto) => (
                               <option key={prod.id} value={prod.id}>
@@ -318,7 +327,9 @@ function PedidosPage() {
                     </div>
                     <Select
                       value={p.status}
-                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => changeStatus(p.id, e.target.value as PedidoEstado)}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        changeStatus(p.id, e.target.value as PedidoEstado)
+                      }
                       className="w-40"
                     >
                       {ESTADOS.map((s: PedidoEstado) => (
