@@ -79,12 +79,12 @@ function ProductosPage() {
     }
   };
 
-  const money = (n: number) =>
+  const money = (n: any) =>
     new Intl.NumberFormat("es-BO", {
       style: "currency",
       currency: "BOB", // ✅ Bolivianos
       minimumFractionDigits: 2,
-    }).format(Number.isFinite(n) ? n : 0);
+    }).format(Number.isFinite(Number(n)) ? Number(n) : 0);
 
   return (
     <div>

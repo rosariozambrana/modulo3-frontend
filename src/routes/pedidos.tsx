@@ -45,12 +45,12 @@ function PedidosPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const money = (n: number) =>
+  const money = (n: any) =>
     new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 2,
-    }).format(Number.isFinite(n) ? n : 0);
+    }).format(Number.isFinite(Number(n)) ? Number(n) : 0);
 
   const load = async () => {
     setLoading(true);
