@@ -211,14 +211,14 @@ function PedidosPage() {
                             <Input
                               type="number"
                               min={1}
-                              max={p?.stock ?? 999}
-                              value={it.quantity}
-                              onChange={(e) =>
+                              value={it.quantity || ""}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
                                 updateItem(i, {
-                                  quantity: Math.max(1, Number(e.target.value) || 1),
-                                })
-                              }
-                              className="text-center"
+                                  quantity: isNaN(val) ? 0 : val
+                                });
+                              }}
+                              className="text-center w-20"
                             />
                             <Button
                               type="button"
