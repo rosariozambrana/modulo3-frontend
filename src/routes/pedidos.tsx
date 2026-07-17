@@ -46,9 +46,9 @@ function PedidosPage() {
   const [error, setError] = useState<unknown>(null);
 
   const money = (n: number) =>
-    new Intl.NumberFormat("es-CO", {
+    new Intl.NumberFormat("es-BO", {
       style: "currency",
-      currency: "USD",
+      currency: "BOB",
       minimumFractionDigits: 2,
     }).format(Number.isFinite(Number(n)) ? Number(n) : 0);
 
