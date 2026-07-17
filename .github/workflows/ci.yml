@@ -31,7 +31,6 @@ jobs:
 
       - name: 5. Run code linting
         run: npm run lint
-        continue-on-error: true
 
   build:
     name: Build Application
