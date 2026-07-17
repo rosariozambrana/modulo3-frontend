@@ -1,5 +1,6 @@
 // Capa HTTP genérica. Configura la URL del backend en .env => VITE_API_URL
-// Ejemplo: VITE_API_URL=http://localhost:3000/api
+// Local:      VITE_API_URL=http://localhost:3000/api
+// Producción: VITE_API_URL=http://phoenix-backend-dev.eba-6mqfmmxf.us-east-1.elasticbeanstalk.com/api
 const BASE_URL =
   (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:3000/api";
 
