@@ -71,6 +71,13 @@ jobs:
           # Limpiar URL de posibles prefijos http:// o https:// y barras diagonales
           CLEAN_URL=$(echo "${{ secrets.EB_APP_URL }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
           URL="http://$CLEAN_URL"
+          
+          echo "=== DEBUG INFO ==="
+          echo "Longitud de la URL limpia: ${#CLEAN_URL}"
+          echo "Intentando resolver DNS para: $CLEAN_URL"
+          nslookup "$CLEAN_URL" || echo "Fallo al resolver DNS"
+          echo "=================="
+
           echo "Waiting for the environment to respond at $URL ..."
           for i in $(seq 1 15); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
