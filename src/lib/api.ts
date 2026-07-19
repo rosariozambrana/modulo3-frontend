@@ -16,9 +16,9 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
     let msg = `Error ${res.status}`;
     let details: unknown = undefined;
     try {
-      const data = await res.json();
-      msg = (data as { message?: string; error?: string }).message || (data as { message?: string; error?: string }).error || msg;
-      details = (data as { details?: unknown }).details;
+      const data = (await res.json()) as { message?: string; error?: string; details?: unknown };
+      msg = data.message || data.error || msg;
+      details = data.details;
     } catch {
       /* ignore */
     }
