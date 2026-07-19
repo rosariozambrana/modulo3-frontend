@@ -64,8 +64,8 @@ function ProductosPage() {
     setForm({
       name: p.name,
       description: p.description ?? "",
-      price: p.price,
-      stock: p.stock,
+      price: Number(p.price) || 0,
+      stock: Number(p.stock) || 0,
     });
   };
 
