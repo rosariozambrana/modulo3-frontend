@@ -18,55 +18,39 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Download build artifact from CI
-        uses: actions/download-artifact@v4
-        with:
-          name: build-output
-          path: .output
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare deployment package
+      # ─────────────────────────────────────────
+      # PASO 1: Crear Dockerrun.aws.json
+      # Le dice a Elastic Beanstalk qué imagen Docker usar
+      # ─────────────────────────────────────────
+      - name: Prepare Docker deployment package
         run: |
-          # Create deployment directory
-          mkdir -p deploy
+          SHORT_SHA=$(echo "${{ github.event.workflow_run.head_sha }}" | cut -c1-7)
+          IMAGE="ghcr.io/${{ github.repository_owner }}/modulo3-frontend:sha-${SHORT_SHA}"
+          echo "Deploying image: $IMAGE"
 
-          # Copy server build output
-          cp -r .output/server deploy/
-          cp -r .output/public deploy/
-
-          # Copy Elastic Beanstalk environment configuration
-          cp -r .ebextensions deploy/
-
-          # Create production package.json
-          cat > deploy/package.json << EOF
+          cat > Dockerrun.aws.json << EOF
           {
-            "name": "phoenix-orders-frontend",
-            "version": "1.0.0",
-            "type": "module",
-            "scripts": {
-              "start": "NITRO_PORT=8080 NITRO_HOST=127.0.0.1 node server/index.mjs"
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${IMAGE}",
+              "Update": "true"
             },
-            "engines": {
-              "node": "20.x"
-            }
+            "Ports": [
+              {
+                "ContainerPort": "8080",
+                "HostPort": "80"
+              }
+            ]
           }
           EOF
 
-          # Create Procfile for Elastic Beanstalk
-          echo "web: npm start" > deploy/Procfile
+          cat Dockerrun.aws.json
+          zip deploy.zip Dockerrun.aws.json
 
-          # List deployment contents
-          echo "=== Deployment package contents ==="
-          ls -la deploy/
-
-      - name: Generate deployment package
-        run: |
-          cd deploy
-          zip -r ../deploy.zip .
-          cd ..
-          ls -lh deploy.zip
-
+      # ─────────────────────────────────────────
+      # PASO 2: Subir a Elastic Beanstalk
+      # EB descargará la imagen de ghcr.io y la correrá
+      # ─────────────────────────────────────────
       - name: Deploy to Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
@@ -74,16 +58,19 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: ${{ secrets.EB_APPLICATION_NAME }}
           environment_name: ${{ secrets.EB_ENVIRONMENT_NAME }}
-          version_label: ${{ github.sha }}-${{ github.run_number }}
+          version_label: docker-${{ github.event.workflow_run.head_sha }}-${{ github.run_number }}
           region: ${{ secrets.AWS_REGION }}
           deployment_package: deploy.zip
           use_existing_version_if_available: true
 
+      # ─────────────────────────────────────────
+      # PASO 3: Smoke Test
+      # ─────────────────────────────────────────
       - name: Smoke test deployed environment
         run: |
-          URL="http://Phoenixorders-dev.us-east-1.elasticbeanstalk.com"
+          URL="http://${{ secrets.EB_APP_URL }}"
           echo "Waiting for the environment to respond at $URL ..."
-          for i in $(seq 1 10); do
+          for i in $(seq 1 15); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
               echo "✅ Smoke test passed (HTTP $STATUS)"
@@ -97,5 +84,6 @@ jobs:
 
       - name: Deployment successful
         run: |
-          echo "✅ Frontend deployed successfully to Elastic Beanstalk!"
-          echo "URL: http://Phoenixorders-dev.us-east-1.elasticbeanstalk.com"
+          echo "✅ Frontend deployed via Docker image!"
+          echo "Image: ghcr.io/${{ github.repository_owner }}/modulo3-frontend:latest"
+          echo "URL: http://${{ secrets.EB_APP_URL }}"
