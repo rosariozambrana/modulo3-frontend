@@ -68,7 +68,9 @@ jobs:
       # ─────────────────────────────────────────
       - name: Smoke test deployed environment
         run: |
-          URL="http://${{ secrets.EB_APP_URL }}"
+          # Limpiar URL de posibles prefijos http:// o https:// y barras diagonales
+          CLEAN_URL=$(echo "${{ secrets.EB_APP_URL }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
+          URL="http://$CLEAN_URL"
           echo "Waiting for the environment to respond at $URL ..."
           for i in $(seq 1 15); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
@@ -84,6 +86,8 @@ jobs:
 
       - name: Deployment successful
         run: |
+          # Limpiar URL para el log de éxito
+          CLEAN_URL=$(echo "${{ secrets.EB_APP_URL }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
           echo "✅ Frontend deployed via Docker image!"
           echo "Image: ghcr.io/${{ github.repository_owner }}/modulo3-frontend:latest"
-          echo "URL: http://${{ secrets.EB_APP_URL }}"
+          echo "URL: http://$CLEAN_URL"
