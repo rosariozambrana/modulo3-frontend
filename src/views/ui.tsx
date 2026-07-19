@@ -129,9 +129,19 @@ export function EmptyState({ message }: { message: string }) {
 export function ErrorBanner({ error }: { error: unknown }) {
   if (!error) return null;
   const msg = error instanceof Error ? error.message : String(error);
+  const details = (error as any).details;
   return (
     <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-      {msg}
+      <div className="font-bold">{msg}</div>
+      {Array.isArray(details) && details.length > 0 && (
+        <ul className="mt-1.5 list-inside list-disc pl-2 text-xs space-y-0.5">
+          {details.map((d: any, i: number) => (
+            <li key={i}>
+              <span className="font-semibold">{d.path}:</span> {d.message}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

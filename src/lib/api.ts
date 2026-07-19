@@ -14,13 +14,17 @@ async function request<T>(path: string, method: Method = "GET", body?: unknown):
   });
   if (!res.ok) {
     let msg = `Error ${res.status}`;
+    let details: any = undefined;
     try {
       const data = await res.json();
       msg = data.message || data.error || msg;
+      details = data.details;
     } catch {
       /* ignore */
     }
-    throw new Error(msg);
+    const err = new Error(msg);
+    if (details) (err as any).details = details;
+    throw err;
   }
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
