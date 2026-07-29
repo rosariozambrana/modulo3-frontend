@@ -14,6 +14,7 @@ import { Route as PedidosRouteImport } from './routes/pedidos'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as IndexRouteImport } from './routes/index'
 
+
 const ProductosRoute = ProductosRouteImport.update({
   id: '/productos',
   path: '/productos',
