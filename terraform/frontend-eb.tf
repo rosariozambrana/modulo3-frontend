@@ -13,7 +13,7 @@ resource "aws_elastic_beanstalk_application" "frontend" {
 resource "aws_elastic_beanstalk_environment" "frontend" {
   name                = "${var.app_name}-frontend-${var.environment}"
   application         = aws_elastic_beanstalk_application.frontend.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.4.1 running Docker"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.13.5 running Docker"
 
   # ── Configuración de red ──
   setting {

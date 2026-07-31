@@ -16,7 +16,6 @@ jobs:
 
     env:
       TF_VAR_frontend_image: "ghcr.io/${{ github.repository_owner }}/modulo3-frontend:latest"
-      TF_VAR_backend_url: ${{ secrets.BACKEND_URL }}
 
     steps:
       - name: Checkout source code
@@ -32,6 +31,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      # ─────────────────────────────────────────
+      # PASO DINO/AUTO: Consultar URL del Backend directamente desde AWS
+      # ─────────────────────────────────────────
+      - name: Fetch Backend URL automatically from AWS Elastic Beanstalk
+        run: |
+          BACKEND_CNAME=$(aws elasticbeanstalk describe-environments --application-name modulo3-backend --environment-names modulo3-backend-production --query "Environments[0].CNAME" --output text)
+          if [ "$BACKEND_CNAME" != "None" ] && [ -n "$BACKEND_CNAME" ]; then
+            echo "TF_VAR_backend_url=http://$BACKEND_CNAME" >> $GITHUB_ENV
+            echo "✅ Backend URL auto-detected: http://$BACKEND_CNAME"
+          else
+            echo "⚠️ Backend environment not found in AWS, using fallback empty string"
+            echo "TF_VAR_backend_url=" >> $GITHUB_ENV
+          fi
 
       # ─────────────────────────────────────────
       # PASO 2: Instalar Terraform
