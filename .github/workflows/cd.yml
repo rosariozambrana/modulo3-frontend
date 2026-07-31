@@ -14,12 +14,71 @@ jobs:
     permissions:
       actions: read
 
+    env:
+      TF_VAR_frontend_image: "ghcr.io/${{ github.repository_owner }}/modulo3-frontend:latest"
+      TF_VAR_backend_url: ${{ secrets.BACKEND_URL }}
+
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
       # ─────────────────────────────────────────
-      # PASO 1: Crear Dockerrun.aws.json
+      # PASO 1: Configurar credenciales AWS
+      # Terraform necesita acceso a AWS para crear recursos
+      # ─────────────────────────────────────────
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # ─────────────────────────────────────────
+      # PASO 2: Instalar Terraform
+      # ─────────────────────────────────────────
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      # ─────────────────────────────────────────
+      # PASO 3: Terraform Init
+      # Descarga los plugins necesarios (proveedor AWS)
+      # ─────────────────────────────────────────
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      # ─────────────────────────────────────────
+      # PASO 4: Terraform Plan
+      # Muestra qué recursos va a crear/modificar (sin crear aún)
+      # ─────────────────────────────────────────
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform plan
+
+      # ─────────────────────────────────────────
+      # PASO 5: Terraform Apply
+      # CREA LA INFRAESTRUCTURA DEL FRONTEND AUTOMATICAMENTE
+      # Si ya existe, la verifica y actualiza si es necesario
+      # ─────────────────────────────────────────
+      - name: Terraform Apply (Provisionar servidor frontend)
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+
+      # ─────────────────────────────────────────
+      # PASO 6: Obtener URL del frontend desde Terraform
+      # No necesitas copiar nada manualmente - es automático
+      # ─────────────────────────────────────────
+      - name: Get Terraform outputs
+        working-directory: ./terraform
+        id: tf_outputs
+        run: |
+          echo "frontend_url=$(terraform output -raw frontend_url)" >> $GITHUB_OUTPUT
+          echo "eb_env_name=$(terraform output -raw eb_environment_name)" >> $GITHUB_OUTPUT
+
+      # ─────────────────────────────────────────
+      # PASO 7: Crear Dockerrun.aws.json
       # Le dice a Elastic Beanstalk qué imagen Docker usar
       # ─────────────────────────────────────────
       - name: Prepare Docker deployment package
@@ -48,7 +107,7 @@ jobs:
           zip deploy.zip Dockerrun.aws.json
 
       # ─────────────────────────────────────────
-      # PASO 2: Subir a Elastic Beanstalk
+      # PASO 8: Deploy a Elastic Beanstalk
       # EB descargará la imagen de ghcr.io y la correrá
       # ─────────────────────────────────────────
       - name: Deploy to Elastic Beanstalk
@@ -64,21 +123,13 @@ jobs:
           use_existing_version_if_available: true
 
       # ─────────────────────────────────────────
-      # PASO 3: Smoke Test
+      # PASO 9: Smoke Test
+      # Usa la URL generada por Terraform automáticamente
       # ─────────────────────────────────────────
       - name: Smoke test deployed environment
         run: |
-          # Limpiar URL de posibles prefijos http:// o https:// y barras diagonales
-          CLEAN_URL=$(echo "${{ secrets.EB_APP_URL }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-          URL="http://$CLEAN_URL"
-          
-          echo "=== DEBUG INFO ==="
-          echo "Longitud de la URL limpia: ${#CLEAN_URL}"
-          echo "Intentando resolver DNS para: $CLEAN_URL"
-          nslookup "$CLEAN_URL" || echo "Fallo al resolver DNS"
-          echo "=================="
-
-          echo "Waiting for the environment to respond at $URL ..."
+          URL="${{ steps.tf_outputs.outputs.frontend_url }}"
+          echo "Waiting for the frontend to respond at $URL ..."
           for i in $(seq 1 15); do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
             if [ "$STATUS" = "200" ]; then
@@ -88,13 +139,11 @@ jobs:
             echo "Attempt $i: got HTTP $STATUS, retrying in 10s..."
             sleep 10
           done
-          echo "❌ Smoke test failed: environment did not return HTTP 200"
+          echo "❌ Smoke test failed: frontend did not return HTTP 200"
           exit 1
 
       - name: Deployment successful
         run: |
-          # Limpiar URL para el log de éxito
-          CLEAN_URL=$(echo "${{ secrets.EB_APP_URL }}" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-          echo "✅ Frontend deployed via Docker image!"
+          echo "✅ Frontend deployed via Docker image con IaC!"
           echo "Image: ghcr.io/${{ github.repository_owner }}/modulo3-frontend:latest"
-          echo "URL: http://$CLEAN_URL"
+          echo "URL: ${{ steps.tf_outputs.outputs.frontend_url }}"
