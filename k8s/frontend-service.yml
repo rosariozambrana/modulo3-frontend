@@ -1,0 +1,24 @@
+﻿# ============================================================
+# FRONTEND SERVICE - tipo LoadBalancer
+# ------------------------------------------------------------
+# Expone el frontend al mundo exterior.
+# En AWS crea automaticamente un ELB con URL publica.
+# ============================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service   # Nombre del servicio
+
+spec:
+  # LoadBalancer: AWS crea un ELB automaticamente y te da una URL publica
+  type: LoadBalancer
+
+  # Conecta este Service con los Pods que tengan el label app: frontend
+  selector:
+    app: frontend
+
+  ports:
+    - protocol: TCP
+      port: 80              # Puerto por el que el mundo exterior accede (HTTP)
+      targetPort: 8080      # Puerto interno del contenedor (donde sirve el frontend)

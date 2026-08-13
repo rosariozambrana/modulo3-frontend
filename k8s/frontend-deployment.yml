@@ -1,0 +1,72 @@
+﻿# ============================================================
+# FRONTEND DEPLOYMENT
+# ------------------------------------------------------------
+# Un Deployment le dice a Kubernetes:
+#   "Quiero que mantengas SIEMPRE 2 copias de este contenedor
+#    corriendo con esta imagen Docker del frontend React/Vite"
+# ============================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend           # Nombre del deployment
+
+spec:
+  replicas: 2              # Cuantas copias del contenedor queremos corriendo
+
+  # Le dice al Deployment cuales Pods son "suyos"
+  selector:
+    matchLabels:
+      app: frontend
+
+  # La "receta" del contenedor que Kubernetes va a crear
+  template:
+    metadata:
+      labels:
+        app: frontend      # Etiqueta que identifica este Pod
+
+    spec:
+      containers:
+        - name: frontend
+          image: ghcr.io/rosariozambrana/modulo3-frontend:latest
+
+          ports:
+            - containerPort: 8080    # Puerto en el que sirve el frontend
+
+          # Variables de entorno del frontend
+          env:
+            - name: PORT
+              value: "8080"
+
+            - name: NODE_ENV
+              value: "production"
+
+            # IMPORTANTE: Reemplaza esta URL con la URL EXTERNA del backend-service
+            # (la obtienes con: kubectl get services)
+            - name: VITE_API_URL
+              value: "http://REEMPLAZA-CON-URL-DEL-BACKEND-SERVICE/api"
+
+          # Cuanta CPU y memoria puede usar este contenedor
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+
+          # Kubernetes verifica si el contenedor esta LISTO para recibir trafico
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 15
+
+          # Kubernetes verifica si el contenedor sigue VIVO
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
