@@ -115,3 +115,16 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
+
+      - name: 5. Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: 6. Actualizar Kubernetes EKS Deployment
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name modulo3-cluster
+          kubectl rollout restart deployment/frontend
+          kubectl rollout status deployment/frontend --timeout=120s
